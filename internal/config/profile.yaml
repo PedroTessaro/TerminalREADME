@@ -2,30 +2,29 @@
 # from the GitHub API at request time.
 identity:
   name: "Pedro Tessaro"
-  role: "Backend Engineer"
-  location: "Brazil"
+  role: "iOS Developer"
+  location: "São Paulo"
   github_user: "PedroTessaro"
-  tagline: "CS student · piano teacher"
-  availability: "open to backend roles · remote or São Paulo · EN/PT"
+  tagline: "Apple Developer Academy · Swift compiler contributor"
+  availability: "open to iOS roles · remote · EN/PT"
 
 stack:
-  - "Go"
-  - "Java"
-  - "C/C++"
-  - "PostgreSQL"
-  - "Docker"
+  - "Swift"
+  - "SwiftUI"
+  - "CloudKit"
+  - "Metal"
+  - "UIKit"
 
 # The shop window. Only the names live here; language, stars and last push are
 # read live, so the listing can't go stale. Order is by last push, not by this
 # list. A name that no longer exists is skipped with a warning in the logs.
 projects:
+  - "NotADiary"
+  - "Karthos"
+  - "DeckExtinction"
+  - "TrigMage"
   - "TerminalREADME"
-  - "RSSAggregator"
-  - "AssemblerImplementation"
-  - "ReversePolishNotationInterpreter"
-  - "parallel_programming_studies"
 
 terminal:
   host: "pedrotessaro.vercel.app"
   user: "tessaro"
-  machine: "portfolio"

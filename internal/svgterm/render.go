@@ -44,6 +44,16 @@ const (
 
 const fontStack = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace"
 
+// The title is the one run of text that isn't on the grid, so it can be in the
+// system font like a real title bar.
+const titleFontStack = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif"
+
+const windowRadius = 12.0
+
+// The window controls are drawn in macOS's own colours rather than the theme's,
+// since they're the same in every theme on a real Mac.
+var trafficLights = [...]string{"#ff5f57", "#febc2e", "#28c840"}
+
 type Data struct {
 	Cfg      *config.Config
 	Stats    githubapi.Stats
@@ -148,7 +158,9 @@ func Render(d Data, p Palette) []byte {
 			cursorX, num(lastY-13), num(charWidth), p.Foreground, num(blinkPeriod), num(t))
 	}
 
-	title := fmt.Sprintf("%s@%s: ~", d.Cfg.Terminal.User, d.Cfg.Terminal.Machine)
+	// Terminal.app's own title format, with the size the window really has.
+	cols := int((width - 2*padX) / charWidth)
+	title := fmt.Sprintf("%s — -zsh — %d×%d", d.Cfg.Terminal.User, cols, len(lines))
 	return assemble(width, height, title, defs.String(), body.String(), lines, p)
 }
 
@@ -174,7 +186,7 @@ func writeTypedLine(defs, body *strings.Builder, l line, idx int, y, begin, dur 
 			`<animate attributeName="x" values="%s" calcMode="discrete" dur="%ss" begin="%ss" fill="freeze"/>`+
 			`<set attributeName="opacity" to="0" begin="%ss"/>`+
 			`</rect>`,
-		num(padX), num(y-13), num(charWidth), p.Green,
+		num(padX), num(y-13), num(charWidth), p.Foreground,
 		num(begin), steps(n, padX, charWidth), num(dur), num(begin), num(begin+dur))
 }
 
@@ -217,8 +229,8 @@ func assemble(width, height float64, title, defs, body string, lines []line, p P
 		num(width), num(height), num(width), num(height), escape(strings.Join(label, " · ")))
 	fmt.Fprintf(&b, `<desc>%s</desc>`, escape(strings.Join(label, "\n")))
 
-	fmt.Fprintf(&b, `<defs><clipPath id="window"><rect x="0" y="0" width="%s" height="%s" rx="10"/></clipPath>%s</defs>`,
-		num(width), num(height), defs)
+	fmt.Fprintf(&b, `<defs><clipPath id="window"><rect x="0" y="0" width="%s" height="%s" rx="%s"/></clipPath>%s</defs>`,
+		num(width), num(height), num(windowRadius), defs)
 
 	fmt.Fprintf(&b, `<g clip-path="url(#window)">`)
 	fmt.Fprintf(&b, `<rect width="%s" height="%s" fill="%s"/>`, num(width), num(height), p.Background)
@@ -226,19 +238,19 @@ func assemble(width, height float64, title, defs, body string, lines []line, p P
 	fmt.Fprintf(&b, `<rect y="%s" width="%s" height="1" fill="%s"/>`, num(titleBar), num(width), p.Border)
 	b.WriteString(`</g>`)
 
-	for i, c := range []string{p.Red, p.Yellow, p.Green} {
-		fmt.Fprintf(&b, `<circle cx="%s" cy="%s" r="5.5" fill="%s"/>`, num(padX-4+float64(i)*20), num(titleBar/2), c)
+	for i, c := range trafficLights {
+		fmt.Fprintf(&b, `<circle cx="%s" cy="%s" r="6" fill="%s"/>`, num(padX-6+float64(i)*20), num(titleBar/2), c)
 	}
 
 	fmt.Fprintf(&b,
-		`<text x="%s" y="%s" fill="%s" font-family="%s" font-size="12" text-anchor="middle">%s</text>`,
-		num(width/2), num(titleBar/2+4), p.Dim, fontStack, escape(title))
+		`<text x="%s" y="%s" fill="%s" font-family="%s" font-size="13" font-weight="600" text-anchor="middle">%s</text>`,
+		num(width/2), num(titleBar/2+4.5), p.Dim, titleFontStack, escape(title))
 
 	fmt.Fprintf(&b, `<g font-family="%s" font-size="%s">%s</g>`, fontStack, num(fontSize), body)
 
 	// Half-pixel offset keeps the border from rendering fuzzy.
-	fmt.Fprintf(&b, `<rect x="0.5" y="0.5" width="%s" height="%s" rx="10" fill="none" stroke="%s"/>`,
-		num(width-1), num(height-1), p.Border)
+	fmt.Fprintf(&b, `<rect x="0.5" y="0.5" width="%s" height="%s" rx="%s" fill="none" stroke="%s"/>`,
+		num(width-1), num(height-1), num(windowRadius-0.5), p.Border)
 
 	b.WriteString(`</svg>`)
 	return []byte(b.String())

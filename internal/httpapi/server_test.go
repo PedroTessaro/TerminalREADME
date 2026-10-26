@@ -80,7 +80,7 @@ func newServerWith(t *testing.T, kv *store.Store) http.Handler {
 		Config: &config.Config{
 			Identity: config.Identity{Name: "Pedro Tessaro", Role: "Backend Engineer", Location: "Brazil", GitHubUser: "PedroTessaro"},
 			Stack:    []string{"Go", "Java"},
-			Terminal: config.Terminal{Host: "example.fly.dev", User: "tessaro", Machine: "portfolio"},
+			Terminal: config.Terminal{Host: "example.fly.dev", User: "tessaro"},
 		},
 		GitHub:  stubStats{},
 		Store:   kv,
@@ -123,7 +123,7 @@ func newPublishingServer(t *testing.T, token string) http.Handler {
 		Config: &config.Config{
 			Identity: config.Identity{Name: "Pedro Tessaro", Role: "Backend Engineer", GitHubUser: "PedroTessaro"},
 			Stack:    []string{"Go"},
-			Terminal: config.Terminal{Host: "example.dev", User: "tessaro", Machine: "portfolio"},
+			Terminal: config.Terminal{Host: "example.dev", User: "tessaro"},
 		},
 		GitHub:       stubStats{},
 		Store:        store.New(stub.URL, "stub-token"),
@@ -213,7 +213,7 @@ func TestStaticModeSkipsAnimation(t *testing.T) {
 }
 
 func TestThemeParam(t *testing.T) {
-	const lightBG = "#e1e2e7"
+	const lightBG = "#ffffff"
 
 	if body := get(t, newTestServer(t), "/terminal.svg?theme=light").Body.String(); !strings.Contains(body, lightBG) {
 		t.Error("light theme not applied")

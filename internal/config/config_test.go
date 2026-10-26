@@ -19,7 +19,6 @@ stack:
 terminal:
   host: "example.fly.dev"
   user: "tessaro"
-  machine: "portfolio"
 `
 
 func writeConfig(t *testing.T, body string) string {
@@ -49,7 +48,7 @@ func TestLoadRejectsIncompleteConfig(t *testing.T) {
 	for name, body := range map[string]string{
 		"no name":     strings.Replace(valid, `name: "Pedro Tessaro"`, `name: ""`, 1),
 		"no host":     strings.Replace(valid, `host: "example.fly.dev"`, `host: ""`, 1),
-		"empty stack": strings.Split(valid, "stack:")[0] + "\nterminal:\n  host: \"h\"\n  user: \"u\"\n  machine: \"m\"\n",
+		"empty stack": strings.Split(valid, "stack:")[0] + "\nterminal:\n  host: \"h\"\n  user: \"u\"\n",
 		"no identity": "stack:\n  - Go\n",
 	} {
 		t.Run(name, func(t *testing.T) {

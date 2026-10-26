@@ -27,9 +27,8 @@ type Identity struct {
 }
 
 type Terminal struct {
-	Host    string `yaml:"host"`
-	User    string `yaml:"user"`
-	Machine string `yaml:"machine"`
+	Host string `yaml:"host"`
+	User string `yaml:"user"`
 }
 
 type Config struct {
@@ -70,7 +69,6 @@ func (c *Config) validate() error {
 		"identity.github_user": c.Identity.GitHubUser,
 		"terminal.host":        c.Terminal.Host,
 		"terminal.user":        c.Terminal.User,
-		"terminal.machine":     c.Terminal.Machine,
 	}
 	for field, value := range required {
 		if value == "" {

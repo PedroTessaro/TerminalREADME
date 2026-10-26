@@ -20,42 +20,42 @@ const minLatencySamples = 30
 func buildLines(d Data, p Palette) []line {
 	lines := []line{
 		{typed: true, segs: []segment{
-			{"$ ", p.Green},
-			{"curl", p.Blue},
+			{"$ ", p.Keyword},
+			{"curl", p.Function},
 			{" -s ", p.Foreground},
-			{"https://" + d.Cfg.Terminal.Host + "/whoami", p.Cyan},
+			{"https://" + d.Cfg.Terminal.Host + "/whoami", p.String},
 		}},
 	}
 	lines = append(lines, whoamiLines(d, p)...)
 
 	if len(d.Stats.Projects) > 0 {
 		lines = append(lines, line{}, line{typed: true, segs: []segment{
-			{"$ ", p.Green},
-			{"ls", p.Blue},
+			{"$ ", p.Keyword},
+			{"ls", p.Function},
 			{" -lt ", p.Foreground},
-			{"~/projects", p.Cyan},
+			{"~/projects", p.String},
 		}})
 		lines = append(lines, projectLines(d.Stats.Projects, p)...)
 	}
 
 	if !d.Stats.Last.Empty() {
 		lines = append(lines, line{}, line{typed: true, segs: []segment{
-			{"$ ", p.Green},
-			{"git", p.Blue},
+			{"$ ", p.Keyword},
+			{"git", p.Function},
 			{" log -1 ", p.Foreground},
-			{"--oneline", p.Orange},
+			{"--oneline", p.Flag},
 		}})
 		lines = append(lines, commitLines(d.Stats.Last, p)...)
 	}
 
 	lines = append(lines, line{}, line{typed: true, segs: []segment{
-		{"$ ", p.Green},
-		{"./stats", p.Blue},
-		{" --live", p.Orange},
+		{"$ ", p.Keyword},
+		{"./stats", p.Function},
+		{" --live", p.Flag},
 	}})
 	lines = append(lines, statsLines(d, p)...)
 
-	return append(lines, line{}, line{segs: []segment{{"$ ", p.Green}}})
+	return append(lines, line{}, line{segs: []segment{{"$ ", p.Keyword}}})
 }
 
 func whoamiLines(d Data, p Palette) []line {
@@ -66,7 +66,7 @@ func whoamiLines(d Data, p Palette) []line {
 			{"> ", p.Dim},
 			{id.Name, p.Foreground},
 			{" — ", p.Dim},
-			{id.Role, p.Purple},
+			{id.Role, p.Type},
 		}},
 		{segs: stackLine(d.Cfg.Stack, p)},
 	}
@@ -77,7 +77,7 @@ func whoamiLines(d Data, p Palette) []line {
 	// The one line a recruiter is actually scanning for, so it gets a colour
 	// rather than the dim treatment the rest of the metadata gets.
 	if id.Availability != "" {
-		lines = append(lines, line{segs: []segment{{"> ", p.Dim}, {id.Availability, p.Green}}})
+		lines = append(lines, line{segs: []segment{{"> ", p.Dim}, {id.Availability, p.Success}}})
 	}
 	return lines
 }
@@ -94,7 +94,7 @@ func commitLines(last githubapi.Commit, p Palette) []line {
 
 	return []line{{segs: []segment{
 		{"> ", p.Dim},
-		{last.Repo + "  ", p.Cyan},
+		{last.Repo + "  ", p.Member},
 		{message, p.Foreground},
 		{"  " + sinceRoughly(last.At), p.Dim},
 	}}}
@@ -106,7 +106,7 @@ func stackLine(stack []string, p Palette) []segment {
 		if i > 0 {
 			segs = append(segs, segment{" · ", p.Dim})
 		}
-		segs = append(segs, segment{tech, p.Cyan})
+		segs = append(segs, segment{tech, p.Member})
 	}
 	return segs
 }
@@ -131,9 +131,9 @@ func projectLines(projects []githubapi.Project, p Palette) []line {
 
 		lines = append(lines, line{segs: []segment{
 			{"> ", p.Dim},
-			{padRight(project.Name, nameWidth) + "   ", p.Cyan},
+			{padRight(project.Name, nameWidth) + "   ", p.Member},
 			{padRight(project.Language, langWidth) + "   ", p.Dim},
-			{padRight(stars, 4) + "  ", p.Yellow},
+			{padRight(stars, 4) + "  ", p.Number},
 			{sinceRoughly(project.PushedAt), p.Dim},
 		}})
 	}
@@ -142,11 +142,11 @@ func projectLines(projects []githubapi.Project, p Palette) []line {
 
 func statsLines(d Data, p Palette) []line {
 	github := []pair{
-		{"repos", strconv.Itoa(d.Stats.Repos), p.Yellow},
-		{"stars", strconv.Itoa(d.Stats.Stars), p.Yellow},
+		{"repos", strconv.Itoa(d.Stats.Repos), p.Number},
+		{"stars", strconv.Itoa(d.Stats.Stars), p.Number},
 	}
 	if d.Stats.HasCommits {
-		github = append(github, pair{"commits", humanInt(d.Stats.Commits), p.Yellow})
+		github = append(github, pair{"commits", humanInt(d.Stats.Commits), p.Number})
 	}
 
 	githubLine := pairsLine(github, p)
@@ -154,7 +154,7 @@ func statsLines(d Data, p Palette) []line {
 	// noise on a request that just fetched them.
 	switch age := d.Stats.Age(); {
 	case d.Stats.Stale:
-		githubLine.segs = append(githubLine.segs, segment{"   (stale)", p.Orange})
+		githubLine.segs = append(githubLine.segs, segment{"   (stale)", p.Flag})
 	case age >= time.Minute:
 		githubLine.segs = append(githubLine.segs, segment{
 			fmt.Sprintf("   (cached %s)", shortDur(age)), p.Dim,
@@ -166,18 +166,18 @@ func statsLines(d Data, p Palette) []line {
 	// Written by the CI workflow, never by this service — so the numbers are
 	// whatever the last run on main actually measured.
 	if d.HasCI {
-		status, statusColor := d.CI.Status, p.Green
+		status, statusColor := d.CI.Status, p.Success
 		if status != "passing" {
-			statusColor = p.Red
+			statusColor = p.Failure
 		}
 		lines = append(lines, line{segs: []segment{
 			{"> ", p.Dim},
 			{"ci ", p.Dim},
 			{status, statusColor},
 			{"   tests ", p.Dim},
-			{strconv.Itoa(d.CI.Tests), p.Yellow},
+			{strconv.Itoa(d.CI.Tests), p.Number},
 			{"   coverage ", p.Dim},
-			{fmt.Sprintf("%.0f%%", d.CI.Coverage), p.Yellow},
+			{fmt.Sprintf("%.0f%%", d.CI.Coverage), p.Number},
 		}})
 	}
 
@@ -186,9 +186,9 @@ func statsLines(d Data, p Palette) []line {
 	// stays off rather than reporting noise as though it were a measurement.
 	if d.Latency.Samples >= minLatencySamples {
 		lines = append(lines, pairsLine([]pair{
-			{"p50", shortLatency(d.Latency.P50), p.Purple},
-			{"p95", shortLatency(d.Latency.P95), p.Purple},
-			{"n", humanInt(d.Latency.Samples), p.Purple},
+			{"p50", shortLatency(d.Latency.P50), p.Call},
+			{"p95", shortLatency(d.Latency.P95), p.Call},
+			{"n", humanInt(d.Latency.Samples), p.Call},
 		}, p))
 	}
 
@@ -199,9 +199,9 @@ func statsLines(d Data, p Palette) []line {
 		instance = "warm"
 	}
 	lines = append(lines, pairsLine([]pair{
-		{"region", d.Region, p.Green},
-		{"instance", instance, p.Green},
-		{"served in", shortLatency(d.ServedIn), p.Green},
+		{"region", d.Region, p.Function},
+		{"instance", instance, p.Function},
+		{"served in", shortLatency(d.ServedIn), p.Function},
 	}, p))
 
 	// Without a configured store there is no counter to show.
@@ -209,7 +209,7 @@ func statsLines(d Data, p Palette) []line {
 		lines = append(lines, line{segs: []segment{
 			{"> ", p.Dim},
 			{"readme views ", p.Dim},
-			{humanInt(d.Views.Total), p.Purple},
+			{humanInt(d.Views.Total), p.Call},
 			{fmt.Sprintf("  (+%s today)", humanInt(d.Views.Today)), p.Dim},
 		}})
 	}

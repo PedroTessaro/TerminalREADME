@@ -2,54 +2,72 @@ package svgterm
 
 import "strings"
 
+// Palette is named after Xcode's syntax roles rather than ANSI colours, since
+// that is where the values come from: the portfolio shows its Swift snippets in
+// Xcode's Default theme, and the terminal on the profile should look like it
+// came off the same machine.
 type Palette struct {
 	Name       string
 	Background string
 	TitleBar   string
 	Border     string
 	Foreground string
-	Dim        string
-	Green      string
-	Cyan       string
-	Blue       string
-	Purple     string
-	Orange     string
-	Yellow     string
-	Red        string
+	Dim        string // comments
+
+	Keyword  string // the prompt
+	Function string // commands
+	String   string // URLs and paths
+	Member   string // stack, project and repo names
+	Type     string // the role
+	Call     string // latency and views
+	Number   string
+	Flag     string // preprocessor colour: flags, and the stale marker
+
+	// Xcode has no green or red to borrow, so these are the system colours the
+	// site uses for the same meaning.
+	Success string
+	Failure string
 }
 
+// Xcode's "Default (Dark)".
 var dark = Palette{
 	Name:       "dark",
-	Background: "#1a1b26",
-	TitleBar:   "#16161e",
-	Border:     "#292e42",
-	Foreground: "#c0caf5",
-	Dim:        "#565f89",
-	Green:      "#9ece6a",
-	Cyan:       "#7dcfff",
-	Blue:       "#7aa2f7",
-	Purple:     "#bb9af7",
-	Orange:     "#ff9e64",
-	Yellow:     "#e0af68",
-	Red:        "#f7768e",
+	Background: "#1f1f24",
+	TitleBar:   "#2c2c31",
+	Border:     "#3a3a40",
+	Foreground: "#dfdfe0",
+	Dim:        "#7f8c98",
+	Keyword:    "#ff7ab2",
+	Function:   "#67b7a4",
+	String:     "#ff8170",
+	Member:     "#78c2b3",
+	Type:       "#dabaff",
+	Call:       "#b281eb",
+	Number:     "#d9c97c",
+	Flag:       "#ffa14f",
+	Success:    "#30d158",
+	Failure:    "#ff453a",
 }
 
-// Tokyo Night Day: same roles, darkened enough to stay readable on a light
-// background.
+// Xcode's "Default (Light)". The greens and reds are Apple's accessible
+// variants, the plain ones being too faint on white.
 var light = Palette{
 	Name:       "light",
-	Background: "#e1e2e7",
-	TitleBar:   "#d6d8df",
-	Border:     "#b6b9c8",
-	Foreground: "#3760bf",
-	Dim:        "#7a80a4",
-	Green:      "#587539",
-	Cyan:       "#007197",
-	Blue:       "#2e7de9",
-	Purple:     "#7847bd",
-	Orange:     "#b15c00",
-	Yellow:     "#8c6c3e",
-	Red:        "#c64343",
+	Background: "#ffffff",
+	TitleBar:   "#ececee",
+	Border:     "#c6c6c8",
+	Foreground: "#262626",
+	Dim:        "#5d6c79",
+	Keyword:    "#9b2393",
+	Function:   "#326d74",
+	String:     "#c41a16",
+	Member:     "#0f68a0",
+	Type:       "#3900a0",
+	Call:       "#6c36a9",
+	Number:     "#1c00cf",
+	Flag:       "#643820",
+	Success:    "#248a3d",
+	Failure:    "#d70015",
 }
 
 // ThemeByName resolves the ?theme= parameter, falling back to dark.

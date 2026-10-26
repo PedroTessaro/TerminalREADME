@@ -23,7 +23,7 @@ func testData() Data {
 				Tagline:    "CS student",
 			},
 			Stack:    []string{"Go", "Java", "C/C++"},
-			Terminal: config.Terminal{Host: "example.fly.dev", User: "tessaro", Machine: "portfolio"},
+			Terminal: config.Terminal{Host: "example.fly.dev", User: "tessaro"},
 		},
 		Stats: githubapi.Stats{
 			Repos: 27, Stars: 9, Commits: 412, HasCommits: true, FetchedAt: time.Now(),
